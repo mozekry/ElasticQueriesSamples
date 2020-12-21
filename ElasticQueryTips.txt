@@ -1,0 +1,338 @@
+Get All indices Info
+GET /_cat/indices?v
+**************************
+Delete Index
+Delete /pages
+***************************
+Add Index with settings
+ PUT /products
+ {
+   "settings": {
+     "number_of_shards": 2,
+     "number_of_replicas": 2
+   }
+ }
+**************************
+Add document without ID
+POST /products/_doc
+ {
+   "name":"Coffee Maker",
+   "price":64,
+   "in_stock":10
+ }
+*****************************
+Add document with ID
+  PUT /products/_doc/100
+ {
+   "name":"Toaster",
+   "price":49,
+   "in_stock":4
+ }
+******************************
+Get Document by ID
+GET /products/_doc/100
+******************************
+Decrease a value by 1  (Scripted Update)
+POST /products/_update/100
+ {
+   "script": {
+     "source": "ctx._source.in_stock--"
+   }
+ }
+ **********************
+ Assign a value (Scripted Update)
+  POST /products/_update/100
+ {
+   "script": {
+     "source": "ctx._source.in_stock = 10"
+   }
+ }
+ *********************************************
+ update the value by parameter (Scripted Update)
+   POST /products/_update/100
+ {
+   "script": {
+     "source": "ctx._source.in_stock -= params.quantity",
+     "params": {
+       "quantity":4
+     }
+   }
+ }
+***************************************************
+IF doc exist update it else insert it (upsert)
+ POST /IndexName/_update/DocumentID
+ {
+   "script": {
+     "source": "ctx._source.in_stock++"
+   },
+   "upsert": {
+     "name":"Blender",
+     "price":"399",
+     "in_stock":5
+   }
+ }
+************************************************
+Replacing Document
+ PUT /IndexName/_doc/DocumentID
+ {
+   "name":"Toaster",
+   "price":79,
+   "in_stock":4
+ }
+***********************************************
+delete document
+DELETE /IndexName/_doc/DocumentID
+*************************************************
+check current Doc version before update it
+
+POST /products/_update/100?if_primary_term=2&if_seq_no=7
+ {
+   "doc": {
+     "in_stock":123
+   }
+ }
+***************************************************
+
+Update all doc in an index by the same value
+ POST /IndexName/_update_by_query
+ {
+   "script": {
+     "source": "ctx._FieldName--",
+     "lang": "painless"
+   },
+   "query": {
+     "match_all": {}
+   }
+ }
+***********************************************************
+Perform bulk actions with a single rquest
+ POST /_bulk
+ {"index":{"_index":"products","_id": 200}}
+ {"name":"Espresso Machine","price":199,"in_stock":5}
+ {"create":{"_index":"products","_id":201}}
+ {"name":"Milk Frother","price":149,"in_stock":14}
+***************************************************************
+Import json file to Elastic using curl
+curl -H "Content-Type: application/x-ndjson" -XPOST http://{ElasticHost}/{IndexName}/_bulk --data-binary "@{fileName}"
+****************************************************************
+Add New Field mapping
+PUT /{IndexName}/_mapping
+{
+  "properties":
+  {
+    "{propertyName}":{
+      "type":"{propertyType}"
+    }
+  }
+}
+/******************************************************************
+/                                                                 /
+/                           Search Queries                        /
+/                                                                 /
+/******************************************************************
+Search Using Request URI
+
+GET /{IndexName}/_search?q={Field}:{Value} and {Field}:{Value} ...
+***********************************************************************
+Match All Doc
+
+ GET /{IndexName}/_search
+ {
+   "query": {
+     "match_all": {}
+   }
+ }
+*********************************************************************
+Term Level queries (search for exact value and not analyzed)
+search for (dates, numbes, keyword)
+GET /{indexName}/_search
+{
+  "query": {
+    "term": {
+      "{Field}": "{SearchValue}"
+    }
+  }
+}
+************************************************************************
+Full text queries (analyzed using the same analyzer that defined for the filed that being searched)
+
+GET /{indexName}/_search
+{
+  "query": {
+    "match": {
+      "{Field}": "{SearchValue}"
+    }
+  }
+}
+*****************************************************************************
+Term Level queries (search for Muttiple terms inside same filed) --like IN in SQL--
+
+GET /{indexName}/_search
+{
+  "query": {
+    "terms": {
+      "{Field}": [
+        "{SearchValue1}",
+        "{SearchValue2}"
+      ]
+    }
+  }
+}
+**********************************************************************************
+Get documents by IDs
+
+GET /{indexName}/_search
+{
+  "query": {
+    "ids": {
+      "values": [{id1},{id2},{id3}]
+    }
+  }
+}
+************************************************************************************
+Search in Numbers range
+
+GET /{indexName}/_search
+{
+  "query": {
+    "range": {
+      "{filed}": {
+        "gte": 1,
+        "lte": 5
+      }
+    }
+  }
+}
+****************************************************************************************
+Search in Date range
+
+GET /{indexName}/_search
+{
+  "query": {
+    "range": {
+      "{filed}": {
+        "gte": "01-01-2010",
+        "lte": "31-12-2010",
+        "format": "dd-MM-yyyy"
+      }
+    }
+  }
+}
+*************************************************************************************
+Matching documents with at least one non null value
+
+GET /{indexName}/_search
+{
+  "query": {
+    "exists": {
+      "field": "{fieldName}"
+    }
+  }
+}
+**************************************************************************************
+Matching based on prefixes (search a word begins with a prefix)
+GET /{indexName}/_search
+{
+  "query": {
+   "prefix": {
+     "{fieldName}": "{prefix}"
+   }
+  }
+}
+***************************************************************************
+Search by WildCard (* match any char, ? match single char)
+
+GET /{indexName}/_search
+{
+  "query": {
+   "wildcard": {
+     "{fieldName}": "Veget*ble"
+   }
+  }
+}
+**************************************************************************
+Full text queries with specifying the operator (AND, OR) default OR
+and >> require all words to be present in the search field
+or >> at least one word present in the search field
+GET /{indexName}/_search
+{
+  "query": {
+    "match": {
+      "{search field}": 
+      {
+        "quersearchy": "{search value}",
+        "operator": "and" 
+      }
+    }
+  }
+}
+*****************************************************************************
+Full text queries (match words in the exact order)
+
+ GET /{indexName}/_search
+ {
+   "query": {
+     "match_phrase": {
+       "{search field}": "{search value}"
+     }
+   }
+ }
+******************************************************************************
+Multi-Search (search by value in multiple fields)
+
+ GET /{indexName}/_search
+ {
+   "query": {
+     "multi_match": {
+       "query": "{search value}",
+       "fields": ["{field1}","{field2}"...]
+     }
+   }
+ }
+*****************************************************************************
+ 							Boolean Queries (Compund Queries)
+*****************************************************************************
+ Search by MUST, MUST_NOT and SHOULD with filter
+ 
+ MUST >> Document must contains the search value
+ Must_NOT >> Document must not contains the search value
+ SHOULD >> Document should contains the search value (Elastic gives the match document higher relevance score)
+ *You can use one of them only and with or without filter
+ 
+ GET /{indexName}/_search
+ {
+   "query": {
+     "bool": {
+       "must": [
+         {
+           "match": {
+             "{fieldName}": "{Value}"
+           }
+         }
+       ],
+       "must_not": [
+        {
+           "match": {
+             "{fieldName}": "{Value}"
+           }
+         }
+       ], 
+       "should": [
+        {
+           "match": {
+             "{fieldName}": "{Value}"
+           }
+         }
+       ], 
+       "filter": [
+         {
+           "range": {
+             "fieldName}": {
+               "lte": {value}
+             }
+           }
+         }
+       ]
+     }
+   }
+ }

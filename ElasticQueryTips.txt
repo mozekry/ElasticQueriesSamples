@@ -388,3 +388,158 @@ Multi-Search (search by value in multiple fields)
     }
   }
 }
+*********************************************************************
+Query Nested documents
+
+GET /{indexName}/_search
+{
+  "query": {
+    "nested": {
+      "path": "{path_to_nested_doc}",
+      "query": {
+        "bool": {
+          "must": [
+            {
+              "match": {
+                "{path to the field}": "{value}"
+              }
+            },
+            {
+              "term": {
+                "{path to the field}": "{value}"
+              }
+            }
+          ]
+        }
+      }
+    }
+  }
+}
+***************************************************************************
+Get nested result only (INNER_Hits)
+GET /department/_search
+_source : false >> to remove unmatched result from nested document 
+{
+  "_source": false, 
+  "query": {
+    "nested": {
+      "path": "{path_to_nested_doc}",
+      "inner_hits": {}, 
+      "query": {
+        "bool": { 
+         "must": [
+        {
+          "match": {
+            "{path to the field}": "{value}"
+          }
+        },
+        {
+          "term": {
+            "{path to the field}": "{value}"
+          }
+        }
+      ]
+      }
+      }
+    }
+  }
+}
+/******************************************************************
+/                                                                 /
+/                           Joining Queries                       /
+/                                                                 /
+/******************************************************************
+Create index with join mapping
+PUT /{indexName}
+{
+  "mappings": {
+    "properties": {
+      "{join_field}":{
+        "type": "join",
+        "relations":{
+          "{parentName}":"{chiledName}"
+        }
+      }
+    }
+  }
+}
+*******************************************************************
+Adding Parent document with join 
+
+PUT /{indexName}/_doc/{id}
+{
+  "name":"{value}",
+  "{join_field}":"{value}"
+}
+
+Adding child document with join 
+
+PUT /{indexName}/_doc/{id}?routing={parent document ID}
+{
+  "{field1}":"{value}",
+  "{field2}":{value}, 
+  "{field3}":"{value}",
+  "{join_field}":{
+    "name":"{childTypeName}", 
+    "parent":{parent document ID}
+  }
+}
+************************************************************************
+Get child documents by parent ID
+
+GET /{indexName}/_search
+{
+  "query": {
+    "parent_id":{
+      "type":"{childName}",
+      "id":{parentID}
+    }
+  }
+}
+***********************************************************************
+Get child documents when parent document match a query
+
+GET /{indexName}/_search
+{
+  "query": {
+   "has_parent": {
+     "parent_type": "{parentTypeName}",
+     "query": {
+       "term": {
+         "{fieldName}.keyword": "{value}"
+       }
+     }
+   }
+  }
+}
+**************************************************************************
+Get parent documents when child documents match a query
+
+GET /{indexName}/_search
+{
+  "query": {
+   "has_child": {
+     "type": "{chiledTypeName}",
+     "query": {
+       "bool": {
+         "must": [
+           {"range":{
+             "{field}": {
+               "gte": {value}
+             }
+           }
+             
+           }
+         ],
+         "should": [
+           {
+             "term": {
+               "{field}.keyword":"{value}"
+             }
+           }
+         ]
+       }
+     }
+   }
+  }
+}

@@ -105,7 +105,7 @@ Update all doc in an index by the same value
    }
  }
 ***********************************************************
-Perform bulk actions with a single rquest
+Perform bulk actions with a single request
  POST /_bulk
  {"index":{"_index":"products","_id": 200}}
  {"name":"Espresso Machine","price":199,"in_stock":5}
@@ -144,7 +144,7 @@ Match All Doc
  }
 *********************************************************************
 Term Level queries (search for exact value and not analyzed)
-search for (dates, numbes, keyword)
+search for (dates, numbers, keyword)
 GET /{indexName}/_search
 {
   "query": {
@@ -165,7 +165,7 @@ GET /{indexName}/_search
   }
 }
 *****************************************************************************
-Term Level queries (search for Muttiple terms inside same filed) --like IN in SQL--
+Term Level queries (search for Multiple terms inside same filed) --like IN in SQL--
 
 GET /{indexName}/_search
 {
@@ -260,7 +260,7 @@ GET /{indexName}/_search
     "match": {
       "{search field}": 
       {
-        "quersearchy": "{search value}",
+        "query": "{search value}",
         "operator": "and" 
       }
     }
@@ -290,7 +290,7 @@ Multi-Search (search by value in multiple fields)
    }
  }
 *****************************************************************************
- 							Boolean Queries (Compund Queries)
+ 							Boolean Queries (Compound Queries)
 *****************************************************************************
  Search by MUST, MUST_NOT and SHOULD with filter
  
@@ -336,3 +336,55 @@ Multi-Search (search by value in multiple fields)
      }
    }
  }
+ **************************************************************
+ Named Queries for debugging 
+ after execute the query look for "matched_queries" object
+ it has the matched fields according to every query clause 
+ 
+ GET /{indexName}/_search
+{
+  "query": {
+    "bool": {
+      "must": [
+        {
+          "match": {
+            "{field}": {
+              "query": "{Value}",
+              "_name": "{AliasName}"
+            }
+          }
+        }
+      ],
+       "must_not": [
+        {
+          "match": {
+            "{field}": {
+              "query": "{Value}",
+              "_name": "{AliasName}"
+            }
+          }
+        }
+      ],
+      "should": [
+        {
+          "match": {
+            "{field}": {
+              "query": "{Value}",
+              "_name": "{AliasName}"
+            }
+          }
+        }
+      ],
+      "filter":[
+        {
+          "range":{
+            "{field}":{
+              "lte":{integer},
+              "_name":"{AliasName}"
+            }
+          }
+        }
+        ]
+    }
+  }
+}

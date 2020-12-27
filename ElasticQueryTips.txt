@@ -417,8 +417,9 @@ GET /{indexName}/_search
 }
 ***************************************************************************
 Get nested result only (INNER_Hits)
-GET /department/_search
+
 _source : false >> to remove unmatched result from nested document 
+GET /department/_search
 {
   "_source": false, 
   "query": {

@@ -545,3 +545,51 @@ GET /{indexName}/_search
   }
 }
 ****************************************************
+Create index with multiple join mapping
+
+company index has 2 children ["department","supplier"] 
+department has 1 child "employee"
+
+PUT /company
+{
+  "mappings": {
+    "properties": {
+      "join_field":{
+        "type": "join",
+        "relations":{
+          "company":["department","supplier"],
+          "department":"employee"
+        }
+      }
+    }
+  }
+}
+*************************************************************
+ Adding child documents with multiple join 
+ 
+ - Add root document (represent company)
+ PUT /company/_doc/1
+{
+  "name": "My Company Inc.",
+  "join_field": "company"
+}
+
+- Add parent document (represent department)
+PUT /company/_doc/2?routing=1
+{
+  "name": "Development",
+  "join_field": {
+    "name": "department",
+    "parent": 1
+  }
+}
+
+- Add child document (represent employee)
+PUT /company/_doc/3?routing=1
+{
+  "name": "Bo Andersen",
+  "join_field": {
+    "name": "employee",
+    "parent": 2
+  }
+}

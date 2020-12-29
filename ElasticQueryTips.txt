@@ -593,3 +593,114 @@ PUT /company/_doc/3?routing=1
     "parent": 2
   }
 }
+*******************************************************************
+Search documents with multiple join
+
+GET /company/_search
+{
+  "query": {
+    "has_child": {
+      "type": "department",
+      "query": {
+        "has_child": {
+          "type": "employee",
+          "query": {
+            "term": {
+              "name.keyword": "Bo Andersen"
+              
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+*****************************************************************
+Parent and child query with INNER_Hits
+
+- child inner_hits
+
+GET /department/_search
+{
+  "query": {
+    "has_child": {
+      "type": "employee",
+      "inner_hits": {}, 
+      "query": {
+        "bool": {
+          "must": [
+            {
+              "range": {
+                "age": {
+                  "gte": 50
+                }
+              }
+            }
+          ],
+          "should": [
+            {
+              "term": {
+                "gender.keyword": "M"
+              }
+            }
+          ]
+        }
+      }
+    }
+  }
+}
+
+- Parent inner_hits
+
+GET /department/_search
+{
+  "query": {
+    "has_parent": {
+      "parent_type": "department",
+      "inner_hits": {}, 
+      "query": {
+        "term": {
+          "name.keyword": "Development"
+        }
+      }
+    }
+  }
+}
+******************************************************************************
+Looking up terms within another document
+
+*you want to get stories from stories index that the user id = 1 -in users index- is following
+
+- user index structure
+
+PUT /users/_doc/1
+{
+  "name": "John Roberts",
+  "following" : [2, 3]
+}
+
+- stories index structure
+
+PUT /stories/_doc/2
+{
+  "user": 1,
+  "content": "Just another day at the office... #coffee"
+}
+
+GET /stories/_search
+{
+  "query": {
+    "terms": {
+      "user": {
+        "index": "users",
+        "id": "1",
+        "path": "following"
+      }
+    }
+  }
+}
+**********************************************************************************************
+
+
+

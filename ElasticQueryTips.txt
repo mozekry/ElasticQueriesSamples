@@ -700,7 +700,155 @@ GET /stories/_search
     }
   }
 }
-**********************************************************************************************
+/******************************************************************
+/                                                                 /
+/                        Controlling Query Results                /
+/                                                                 /
+/******************************************************************
+Get specific fields from _source object
 
+- Get Single Field
+GET /{indexName}/_search
+{
+  "_source": "{Field}", 
+    "query": {
+      "match": "{field}":"{value}",
+    }
+}
 
+- Get by wild card
+GET /{indexName}/_search
+{
+  "_source": "{Field}.*", 
+    "query": {
+      "match": "{field}":"{value}",
+    }
+}
 
+- Get by array of fields
+GET /{indexName}/_search
+{
+  "_source": ["field1.*","field2"], 
+    "query": {
+      "match": "{field}":"{value}",
+    }
+}
+
+- includes and excludes fields
+GET /{indexName}/_search
+{
+  "_source": {
+    "includes": "ingredients.*",
+    "excludes": "ingredients.name"
+  }, 
+    "query": {
+     "match": "{field}":"{value}",
+    }
+}
+**************************************************************
+Controlling the number of result return (maximum number of hits)
+default 10 
+
+- by query parameter
+GET /{indexName}/_search?size=2
+{
+  "_source": false, 
+    "query": {
+     "match": "{field}":"{value}",
+    }
+}
+
+- by request body
+GET /{indexName}/_search
+{
+  "_source": false, 
+  "size": 2,
+  "from": 4,
+   "query": {
+     "match": "{field}":"{value}",
+    }
+}
+***************************************************************
+specify the offset (pagination)
+default 0
+
+GET /{indexName}/_search
+{
+  "_source": false, 
+  "size": 2,
+  "from": 4,
+   "query": {
+     "match": "{field}":"{value}",
+    }
+}
+****************************************************************
+implement pagination
+
+total pages = ceil(total_hits/pageSize)
+from = (pageSize * (page_number -1))
+*****************************************************************
+Sorting Results
+sortOrder >> asc, desc
+
+GET /{indexName}/_search
+{
+    "query": {
+        "match_all": {}
+    },
+    "sort": [
+        {
+            "{field1}": "{sortOrder}"
+        },
+        {
+            "{field1}": "{sortOrder}"
+        }
+    ]
+}
+*****************************************************************
+Sorting by multi value field
+
+mode avg > get the average value of array then sort by it
+other modes ("max","min","sum")
+
+GET /{indexName}/_search
+{
+  
+  "query": {
+    "match_all": {}
+  },
+  "sort": [
+     {
+       "{field1}": {
+         "order": "desc",
+         "mode": "avg"
+       }
+     }
+    ]
+}
+***********************************************************************
+Filter the result 
+
+GET /{indexName}/_search
+{
+  "query": {
+    "bool": {
+      "must": [
+        {
+          "match": {
+            "{field}": {value}
+          }
+        }
+      ],
+      "filter": [
+        {
+          "range": {
+            "{field}": {
+              "lt": {value}
+            }
+          }
+        }
+      ]
+    }
+  }
+}
+**************************************************************************

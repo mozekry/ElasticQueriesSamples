@@ -130,6 +130,31 @@ PUT /{IndexName}/_mapping
 /                           Search Queries                        /
 /                                                                 /
 /******************************************************************
+get all documents in an index which contains {FieldName}
+
+{
+  
+  "query": {
+    "exists": {
+      "field": "{FieldName}"
+    }
+  }
+}
+**********************************************************
+get all documents in an index which don't contain {FieldName}
+{
+  "query": {
+    "bool": {
+      "must_not": {
+        "exists": {
+          "field": "{FieldName}"
+        }
+      }
+    }
+  }
+}
+
+**********************************************************************
 Search Using Request URI
 
 GET /{IndexName}/_search?q={Field}:{Value} and {Field}:{Value} ...
@@ -336,6 +361,22 @@ Multi-Search (search by value in multiple fields)
      }
    }
  }
+ 
+ 
+GET /{indexName}/_search
+{
+    "query":{
+        "bool":{
+        "filter":[
+            {
+                "term":{
+                    "{field}":"{value}"
+                    }
+            }
+        ]
+    }
+    }
+}
  **************************************************************
  Named Queries for debugging 
  after execute the query look for "matched_queries" object
@@ -851,4 +892,26 @@ GET /{indexName}/_search
     }
   }
 }
-**************************************************************************
+
+anther example 
+
+GET /{indexName}/_search
+{
+    "query":{
+        "bool":{
+        "filter":[
+            {
+                "term":{
+                    "{field}":"{value}"
+                    }
+            }
+        ]
+    }
+    }
+}
+/******************************************************************
+/                                                                 /
+/                        Aggregations                			  /
+/                                                                 /
+/******************************************************************
+

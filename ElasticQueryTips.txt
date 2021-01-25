@@ -915,3 +915,153 @@ GET /{indexName}/_search
 /                                                                 /
 /******************************************************************
 
+					Metric Aggregations
+					*******************
+					
+-Get SUM, AVG, MIN, MAX value of a field					
+GET /{indexName}/_search
+{
+  "size": 0,
+  "aggs": {
+    "{any given name}": {
+      "sum": {
+        "field": "{fieldName}"
+      }
+    },
+     "{any given name}": {
+      "avg": {
+        "field": "{fieldName}"
+      }
+    },
+     "{any given name}": {
+      "min": {
+        "field": "{fieldName}"
+      }
+    },
+     "{any given name}": {
+      "max": {
+        "field": "{fieldName}"
+      }
+    }
+  }
+}
+  }
+}
+**************************************************************
+- cardinality >> Count distinct value of a given field
+
+GET /{indexName}/_search
+{
+  "size": 0,
+  "aggs": {
+    "{any given name}":{
+      "cardinality": {
+        "field": "{fieldName}"
+      }
+    }
+  }
+}
+*****************************************************************
+
+- Get Value Count of a given field
+
+GET /{indexName}/_search
+{
+  "size": 0,
+  "aggs": {
+    "{any given name}":{
+      "value_count": {
+        "field": "{fieldName}"
+      }
+    }
+  }
+}
+*******************************************************************
+Get value_count, min, max, avg, sum of a given field in one query
+
+GET /{indexName}/_search
+{
+  "size": 0,
+  "aggs": {
+    "{any given name}":{
+      "stats": {
+        "field": "{fieldName}"
+      }
+    }
+  }
+}
+*********************************************************************
+						Bucket Aggregations
+						*******************
+- "missing" >> field name for count NULL or empty value of aggregation field
+- "min_doc_count" >> min number of documents to be present in bucket array
+					
+GET /{indexName}/_search
+{
+  "size": 0,
+  "aggs": {
+    "{any given name}": {
+      "terms": {
+        "field": "{fieldName}",
+        "missing": "{any given name}",
+        "min_doc_count": 0,
+        "order": {
+          "_key": "asc"
+        }
+        
+      }
+    }
+  }
+}
+**************************************************************************
+						Nested Aggregations
+						*******************
+						
+						
+GET /{indexName}/_search
+{
+  "size": 0,
+  "aggs": {
+    "{any given name}": {
+      "terms": {
+        "field": "status"
+      },
+      "aggs": {
+        "{any given name}": {
+          "{aggregationType}": {
+            "field": "{FieldName}"
+          }
+        }
+      }
+    }
+  }
+}
+******************************************************
+Nested aggregation with filter
+
+GET /{indexName}/_search
+{
+  "size": 0,
+  "query": {
+    "range": {
+      "{fieldName}": {
+        "gte": 100
+      }
+    }
+  }, 
+ "aggs": {
+    "{any given name}": {
+      "terms": {
+        "field": "status"
+      },
+      "aggs": {
+        "{any given name}": {
+          "{aggregationType}": {
+            "field": "{FieldName}"
+          }
+        }
+      }
+    }
+  }
+}
+*************************************************************

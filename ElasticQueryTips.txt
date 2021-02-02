@@ -1024,7 +1024,7 @@ GET /{indexName}/_search
   "aggs": {
     "{any given name}": {
       "terms": {
-        "field": "status"
+        "field": "{FieldName}"
       },
       "aggs": {
         "{any given name}": {
@@ -1064,4 +1064,165 @@ GET /{indexName}/_search
     }
   }
 }
+
+GET /{indexName}/_search
+{
+  "size": 0,
+  "aggs": {
+    "{any given name}": {
+      "filter": {
+        "{FilterType}": {
+          "{fieldName}": "{value}"
+        }
+      },
+      "aggs": {
+        "{aggregation name}": {
+          "{aggregationType}": {
+            "field": "{FieldName}"
+          }
+        }
+      }
+    }
+  }
+  
+}
 *************************************************************
+Count doc by filters and aggregate the results by a given field
+
+ GET /{indexName}/_search
+ {
+   "size": 0,
+   "aggs": {
+     "{aggregationName}": {
+       "filters": {
+         "filters": {
+           "{bucketName1}": {
+               "{FilterType}": {
+                 "{fieldName}": "{value}"
+               }
+           },
+            "{bucketName2}": {
+               "{FilterType}": {
+                 "{fieldName}": "{value}"
+               }
+           }
+         }
+       },
+       "aggs": {
+         "{aggregationName}": {
+           "{aggregationType}": {
+             "field": "{fieldName}"
+           }
+         }
+       }
+     }
+   }
+ }
+*********************************************************************
+								Range Aggregations
+								******************
+								
+GET /{indexName}/_search
+{
+  "size": 0,
+  "aggs": {
+    "{aggregationName}": {
+      "range": {
+        "field": "{fieldName}",
+        "ranges": [
+          {
+            "to": {value}
+          },
+          {
+            "from": {value}, 
+            "to": {value}
+          },
+          {
+            "from": {value}
+          }
+          
+        ]
+      }
+    }
+  }
+}
+
+
+Date Range
+
+GET /{indexName}/_search
+{
+  "size": 0,
+  "aggs": {
+    "{aggregationName}": {
+      "date_range": {
+        "field": "{fieldName}",
+        "keyed": true,
+        "format": "yyy-MM-dd", 
+        "ranges": [
+          {
+            "from": "{value}",// format > yyy-MM-dd
+            "to": "{value}||+6M", // +6M add 6 months 
+            "key": "{KeyName}"
+          },
+          {
+            "from": "{value}||+6M", 
+            "to": "{value}||+1y", // +1y add 1 year
+            "key": "{keyName}"
+          }
+        ]
+      },
+      "aggs": {
+        "{aggregationName}": {
+          "{aggregationType}": {
+            "field": "{fieldName}"
+          }
+        }
+      }
+    }
+  }
+}
+****************************************************************************
+									Histogram
+									*********
+Dynamically create buckets according to interval 
+
+
+GET /{indexName}/_search
+{
+  "size":0,
+  "aggs": {
+    "{aggregationName}": {
+      "histogram": {
+        "field": "{fieldName}",
+        "interval": {value},
+        "min_doc_count": {value},
+        "extended_bounds": {
+          "min": {value},
+          "max": {value}
+        }
+      }
+    }
+  }
+}
+
+Date Histogram
+***************
+GET /order/_search
+{
+  "size":0,
+  "aggs": {
+    "{aggregationName}": {
+      "date_histogram": {
+        "field": "{fieldName}",
+        "calendar_interval": "{value}",
+        "min_doc_count": 1,
+        "extended_bounds": {
+          "min": 0,
+          "max": 500
+        }
+      }
+    }
+  }
+}
+****************************************************************

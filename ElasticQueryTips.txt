@@ -30,7 +30,22 @@ Add document with ID
  }
 ******************************
 Get Document by ID
+
 GET /products/_doc/100
+
+Get multiple Documents by ID
+
+GET /{indexName}/_mget
+{
+  "docs": [
+    {
+      "_id": "1001"
+    },
+    {
+      "_id": "1002"
+    }
+  ]
+}
 ******************************
 Decrease a value by 1  (Scripted Update)
 POST /products/_update/100
@@ -1183,7 +1198,7 @@ GET /{indexName}/_search
   }
 }
 ****************************************************************************
-									Histogram
+									Histogram Aggregations
 									*********
 Dynamically create buckets according to interval 
 
@@ -1226,3 +1241,31 @@ GET /order/_search
   }
 }
 ****************************************************************
+							Global Aggregations
+							********************
+"global": {} >> will aggregate over all index documents regardless of the query filter							
+GET /{indexName}/_search
+{
+  
+  "query": {
+    "range": {
+      "total_amount": {
+        "gte": 100
+      }
+    }
+  },
+  "size": 0, 
+  "aggs": {
+    "{aggregationName}": {
+      "global": {}, 
+     "aggs": {
+       "{aggregationName}": {
+         "{aggregationType}": {
+           "field": "{fieldName}"
+         }
+       }
+     }
+    }
+  }
+}
+*****************************************************************

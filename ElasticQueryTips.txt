@@ -1269,3 +1269,63 @@ GET /{indexName}/_search
   }
 }
 *****************************************************************
+						Aggregating nested objects
+						**************************
+						
+GET /{indexName}/_search
+{
+  "size": 0,
+  "aggs": {
+    "{aggregationName}": {
+      "nested": {
+        "path": "{nested Path}"
+      },
+      "aggs": {
+        "{aggregationName}": {
+          "{aggregationType}": {
+            "field": "{fileName}"
+          }
+        }
+      }
+    }
+  }
+}
+*********************************************************************
+							Improving Search Results
+							************************
+- Proximity searches
+
+slope >> specify the number of position on any direction the document must match
+e.g. >> 
+if search phrase is "spicy sauce" and slop = 1 >> match > "Spicy (Tomato) Sauce"
+Sauce moved one position
+if slope = 2 >> match > Tomato Sauce spicy
+spicy moved two positions
+
+GET /{indexName}/_search
+{
+  "query": {
+    "match_phrase": {
+      "{fieldName}": {
+        "query": "{search phrase}",
+        "slop": 2
+      }
+    }
+  }
+}
+
+- Handling input search typos
+
+fuzziness >> will shuffle the characters by max distance = 2 to find a match 
+eg. >> Epple >> Apple, l0bster >> lobster
+GET /{indexName}/_search
+{
+  "query": {
+    "match": {
+      "name": {
+        "query": "{search phrase}",
+        "fuzziness": "auto"
+      }
+    }
+  }
+}
